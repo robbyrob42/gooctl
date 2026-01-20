@@ -1,6 +1,6 @@
 # gooctl
 
-A beautiful CLI for Google Workspace (Gmail & Calendar) built with [lipgloss](https://github.com/charmbracelet/lipgloss).
+A simple CLI for Google Workspace (Gmail & Calendar).
 
 ## Installation
 
