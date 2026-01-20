@@ -2,6 +2,15 @@
 
 A simple CLI for Google Workspace (Gmail & Calendar).
 
+## Privacy & Security
+
+**Your data stays yours.** When you set up gooctl, you create your own Google OAuth app in your personal Google Cloud Console. This means:
+
+- All credentials are stored locally on your machine (`~/.config/gooctl/`)
+- Your OAuth app belongs to you, not the gooctl developers
+- We have zero access to your emails, calendar, or any of your data
+- No telemetry, no analytics, no phone-home
+
 ## Installation
 
 ```bash
