@@ -72,3 +72,31 @@ Shorthand: `gooctl cal` works too!
 ## Config Location
 
 Credentials and tokens are stored in `~/.config/gooctl/`
+
+## Claude Code Integration
+
+If you use [Claude Code](https://claude.ai/code), add this to your `~/.claude/CLAUDE.md` so Claude knows how to use gooctl:
+
+```markdown
+## gooctl (GSuite CLI)
+
+- **Mail:** `gooctl mail search "query"`, `gooctl mail unread`, `gooctl mail read <id>`
+- **Calendar:** `gooctl calendar today`, `gooctl cal week`, `gooctl cal search "query"`
+- **Calendar mgmt:** `gooctl cal create --title "X" --start "..." --end "..."`
+- **Auth:** `gooctl auth login`, `gooctl auth status`
+```
+
+### Superhuman Users
+
+If you use Superhuman, it syncs AI labels to Gmail that gooctl can query:
+
+```bash
+# Emails needing your response (filtered by Superhuman AI)
+gooctl mail search 'label:[Superhuman]/AI/Respond'
+
+# Filter out spam/marketing
+gooctl mail search 'is:inbox -label:[Superhuman]/AI/Pitch -label:[Superhuman]/AI/Marketing'
+
+# List all labels
+gooctl mail labels
+```

@@ -310,6 +310,98 @@ var calDeleteCmd = &cobra.Command{
 	},
 }
 
+var calUpdateCmd = &cobra.Command{
+	Use:   "update [event-id]",
+	Short: "Update an existing event",
+	Long: `Update an existing calendar event.
+
+Examples:
+  gooctl calendar update EVENT_ID --start "2024-01-16T10:00:00" --end "2024-01-16T11:00:00"
+  gooctl calendar update EVENT_ID --title "New Title"
+  gooctl calendar update EVENT_ID --move-days 1  # Move event forward 1 day
+`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		eventID := args[0]
+
+		client, err := getCalendarClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		// Get existing event
+		existing, err := client.GetEvent(ctx, "", eventID)
+		if err != nil {
+			return err
+		}
+
+		// Apply updates
+		title, _ := cmd.Flags().GetString("title")
+		description, _ := cmd.Flags().GetString("description")
+		location, _ := cmd.Flags().GetString("location")
+		startStr, _ := cmd.Flags().GetString("start")
+		endStr, _ := cmd.Flags().GetString("end")
+		moveDays, _ := cmd.Flags().GetInt("move-days")
+
+		if title != "" {
+			existing.Summary = title
+		}
+		if description != "" {
+			existing.Description = description
+		}
+		if location != "" {
+			existing.Location = location
+		}
+
+		// Handle move-days (shifts both start and end)
+		if moveDays != 0 {
+			existing.Start = existing.Start.AddDate(0, 0, moveDays)
+			existing.End = existing.End.AddDate(0, 0, moveDays)
+		}
+
+		// Handle explicit start/end times
+		if startStr != "" {
+			start, err := time.Parse(time.RFC3339, startStr)
+			if err != nil {
+				start, err = time.Parse("2006-01-02T15:04:05", startStr)
+				if err != nil {
+					return fmt.Errorf("invalid start time format: %w", err)
+				}
+			}
+			existing.Start = start
+		}
+		if endStr != "" {
+			end, err := time.Parse(time.RFC3339, endStr)
+			if err != nil {
+				end, err = time.Parse("2006-01-02T15:04:05", endStr)
+				if err != nil {
+					return fmt.Errorf("invalid end time format: %w", err)
+				}
+			}
+			existing.End = end
+		}
+
+		updated, err := client.UpdateEvent(ctx, "", eventID, existing)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(ui.Success("Event updated! ✨"))
+		fmt.Printf("  %s: %s\n", ui.LabelStyle.Render("Title"), updated.Summary)
+		if updated.AllDay {
+			fmt.Printf("  %s: %s (all day)\n", ui.LabelStyle.Render("When"), updated.Start.Format("Monday, January 2"))
+		} else {
+			fmt.Printf("  %s: %s, %s - %s\n", ui.LabelStyle.Render("When"),
+				updated.Start.Format("Monday, January 2"),
+				updated.Start.Format("3:04 PM"),
+				updated.End.Format("3:04 PM"))
+		}
+
+		return nil
+	},
+}
+
 var calListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all calendars",
@@ -375,6 +467,14 @@ func init() {
 
 	calendarCmd.AddCommand(calDeleteCmd)
 	calendarCmd.AddCommand(calListCmd)
+
+	calendarCmd.AddCommand(calUpdateCmd)
+	calUpdateCmd.Flags().StringP("title", "t", "", "New event title")
+	calUpdateCmd.Flags().StringP("description", "d", "", "New event description")
+	calUpdateCmd.Flags().StringP("location", "l", "", "New event location")
+	calUpdateCmd.Flags().String("start", "", "New start time (RFC3339 or YYYY-MM-DDTHH:MM:SS)")
+	calUpdateCmd.Flags().String("end", "", "New end time (RFC3339 or YYYY-MM-DDTHH:MM:SS)")
+	calUpdateCmd.Flags().Int("move-days", 0, "Move event by N days (positive=future, negative=past)")
 }
 
 func getCalendarClient(ctx context.Context) (*calpkg.Client, error) {

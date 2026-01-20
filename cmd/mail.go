@@ -218,11 +218,60 @@ var mailUnreadCmd = &cobra.Command{
 	},
 }
 
+var mailLabelsCmd = &cobra.Command{
+	Use:   "labels",
+	Short: "List all Gmail labels",
+	Long:  `List all labels in your Gmail account.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
+		client, err := getGmailClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		labels, err := client.ListLabels(ctx)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(ui.TitleStyle.Render("🏷️  Gmail Labels"))
+		fmt.Println()
+
+		// Group by type
+		var system, user []string
+		for _, l := range labels {
+			if l.Type == "system" {
+				system = append(system, l.Name)
+			} else {
+				user = append(user, l.Name)
+			}
+		}
+
+		if len(user) > 0 {
+			fmt.Println(ui.SuccessStyle.Render("User Labels:"))
+			for _, name := range user {
+				fmt.Printf("  • %s\n", name)
+			}
+			fmt.Println()
+		}
+
+		fmt.Println(ui.SubtleStyle.Render("System Labels:"))
+		for _, name := range system {
+			fmt.Printf("  • %s\n", ui.SubtleStyle.Render(name))
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(mailCmd)
 
 	mailCmd.AddCommand(mailSearchCmd)
 	mailSearchCmd.Flags().Int64P("limit", "n", 10, "Maximum number of results")
+
+	mailCmd.AddCommand(mailLabelsCmd)
 
 	mailCmd.AddCommand(mailReadCmd)
 	mailCmd.AddCommand(mailThreadCmd)

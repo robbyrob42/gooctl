@@ -165,6 +165,32 @@ func (c *Client) MarkAsUnread(ctx context.Context, id string) error {
 	return err
 }
 
+// Label represents a Gmail label
+type Label struct {
+	ID   string
+	Name string
+	Type string
+}
+
+// ListLabels returns all labels in the mailbox
+func (c *Client) ListLabels(ctx context.Context) ([]*Label, error) {
+	resp, err := c.service.Users.Labels.List(c.userID).Context(ctx).Do()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list labels: %w", err)
+	}
+
+	var labels []*Label
+	for _, l := range resp.Labels {
+		labels = append(labels, &Label{
+			ID:   l.Id,
+			Name: l.Name,
+			Type: l.Type,
+		})
+	}
+
+	return labels, nil
+}
+
 // parseMessage converts a Gmail API message to our Message type
 func parseMessage(msg *gmail.Message) *Message {
 	m := &Message{

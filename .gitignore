@@ -1,0 +1,29 @@
+# Credentials and tokens (stored in ~/.config/gooctl/, but just in case)
+credentials.json
+token.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+/gooctl
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
