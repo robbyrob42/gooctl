@@ -1,6 +1,11 @@
 # gooctl
 
-A simple CLI for Google Workspace (Gmail & Calendar).
+A simple CLI for Google Workspace (Gmail & Calendar).  Give this to your Claude Code or another CLI agent, and let them manage your life :)
+
+
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/1a96b8a7-1c59-423f-9a33-48c726074a75" />
+
 
 ## Privacy & Security
 
